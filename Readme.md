@@ -2,7 +2,7 @@
 
 A production-style REST API built using FastAPI that demonstrates clean backend architecture patterns including JWT authentication, dependency injection, service-repository separation, pagination, and centralized exception handling.
 
-# Features
+## Features
 
 * JWT Authentication
 * Protected Endpoints
