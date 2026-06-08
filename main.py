@@ -128,3 +128,7 @@ def get_projects(
         skip,
         limit
     )
+
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
