@@ -139,6 +139,41 @@ Response:
 * JWT Authentication
 * Uvicorn
 
+## Docker Features
+
+This project includes production-oriented containerization practices:
+
+* Multi-stage Docker build
+* Non-root container user
+* Health check endpoint (`/health`)
+* Docker HEALTHCHECK configuration
+* Slim Python base image (`python:3.12-slim`)
+* Reduced image size from ~426 MB to ~50 MB
+
+### Build Image
+
+```bash
+docker build -t fastapi-rest-api .
+```
+
+### Run Container
+
+```bash
+docker run -d -p 8000:8000 --name fastapi-api fastapi-rest-api
+```
+
+### Verify Health
+
+```bash
+docker ps
+```
+
+Expected:
+
+```text
+Up (healthy)
+```
+
 ## Running Locally
 
 Install dependencies:
@@ -171,6 +206,11 @@ This project was built to practice:
 * Exception Handling
 * Pagination
 * FastAPI Development
+* Docker Fundamentals
+* Multi-Stage Docker Builds
+* Container Health Checks
+* Container Security (Non-Root User)
+* Production-Oriented Deployment Practices
 
 ```
 ```
