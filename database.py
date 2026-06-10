@@ -10,7 +10,7 @@ class Base(DeclarativeBase):
     pass
 
 DATABASE_URL = (
-    "postgresql+asyncpg://postgres:YOURPASSWORD@localhost:5432/task_manager"
+    "postgresql+asyncpg://postgres:your_password@localhost:5432/task_manager"
 )
 
 engine = create_async_engine(

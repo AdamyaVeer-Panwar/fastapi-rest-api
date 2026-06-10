@@ -6,18 +6,13 @@ from sqlalchemy import (
     Integer,
     String,
     DateTime,
+    ForeignKey
 )
 
 from sqlalchemy.orm import (
     Mapped,
     mapped_column,
-)
-
-from sqlalchemy import (
-    Integer,
-    String,
-    DateTime,
-    ForeignKey
+    relationship
 )
 
 
@@ -46,6 +41,15 @@ class User(Base):
         nullable=False
     )
 
+    projects: Mapped[list["Project"]] = relationship(
+        back_populates="user"
+    )
+
+    tasks: Mapped[list["Task"]] = relationship(
+        back_populates="user"
+    )
+
+
 class Project(Base):
     __tablename__ = "projects"
 
@@ -69,6 +73,15 @@ class Project(Base):
         default=datetime.utcnow,
         nullable=False
     )
+
+    user: Mapped["User"] = relationship(
+        back_populates="projects"
+    )
+
+    tasks: Mapped[list["Task"]] = relationship(
+        back_populates="project"
+    )
+
 
 class Task(Base):
     __tablename__ = "tasks"
@@ -103,4 +116,12 @@ class Task(Base):
         DateTime,
         default=datetime.utcnow,
         nullable=False
+    )
+
+    user: Mapped["User"] = relationship(
+        back_populates="tasks"
+    )
+
+    project: Mapped["Project"] = relationship(
+        back_populates="tasks"
     )
