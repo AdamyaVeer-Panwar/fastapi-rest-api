@@ -24,3 +24,22 @@ class UserRepository:
         result = await self.session.execute(query)
 
         return result.scalar_one_or_none()
+    
+    async def create(
+        self,
+        user: User
+    ):
+        self.session.add(user)
+
+        await self.session.commit()
+
+        await self.session.refresh(user)
+
+        return user
+    
+    async def get_all(self):
+        query = select(User)
+
+        result = await self.session.execute(query)
+
+        return result.scalars().all()

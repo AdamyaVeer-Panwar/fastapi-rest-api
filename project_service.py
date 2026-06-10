@@ -1,5 +1,5 @@
+from models import Project
 from project_repository import ProjectRepository
-from exceptions import ProjectNotFoundException
 
 
 class ProjectService:
@@ -10,49 +10,23 @@ class ProjectService:
     ):
         self.repository = repository
 
-    def create_project(
+    async def create_project(
         self,
         name: str,
-        projects: list
+        user_id: int
     ):
-
-        project = {
-            "id": len(projects) + 1,
-            "name": name
-        }
-
-        return self.repository.create(
-        project,
-        projects
+        project = Project(
+            name=name,
+            user_id=user_id
         )
-    
-    def get_project(
+
+        return await self.repository.create(project)
+
+    async def get_project(
         self,
-        project_id: int,
-        projects: list
+        project_id: int
     ):
+        return await self.repository.get_by_id(project_id)
 
-        project = self.repository.get_by_id(
-        project_id,
-        projects
-    )
-
-        if not project:
-            raise ProjectNotFoundException()
-
-        return project
-    
-    def get_projects(
-    self,
-    projects: list,
-    skip: int,
-    limit: int
-):
-
-        all_projects = self.repository.get_all(
-        projects
-    )
-
-        return all_projects[
-        skip : skip + limit
-    ]
+    async def get_projects(self):
+        return await self.repository.get_all()
