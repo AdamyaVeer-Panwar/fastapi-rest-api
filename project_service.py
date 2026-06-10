@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from models import Project
 from project_repository import ProjectRepository
 
@@ -30,3 +31,17 @@ class ProjectService:
 
     async def get_projects(self):
         return await self.repository.get_all()
+
+    async def delete_project(
+        self,
+        project_id: int
+    ):
+        project = await self.repository.get_by_id(project_id)
+
+        if not project:
+            raise HTTPException(
+                status_code=404,
+                detail="Project not found"
+            )
+
+        return await self.repository.delete(project_id)

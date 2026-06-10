@@ -4,46 +4,34 @@ from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.responses import JSONResponse
 
-from exceptions import ProjectNotFoundException
-
-from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth import create_access_token
 from auth import decode_access_token
 
-from user_repository import UserRepository
+from exceptions import ProjectNotFoundException
 
+from database import get_db
+
+from user_repository import UserRepository
 from project_repository import ProjectRepository
+
 from project_service import ProjectService
+from user_service import UserService
+
+from schemas import ProjectCreate
+from schemas import UserCreate
+
+from task_repository import TaskRepository
+from task_service import TaskService
+
+from schemas import TaskCreate
 
 app = FastAPI()
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="login"
 )
-
-repository = ProjectRepository()
-
-service = ProjectService(
-    repository
-)
-
-projects = []
-
-
-class ProjectCreate(BaseModel):
-    name: str
-
-
-@app.post("/projects")
-async def create_project(
-    project: ProjectCreate
-):
-    return service.create_project(
-        project.name,
-        projects
-    )
-
 
 @app.post("/login")
 async def login():
@@ -55,26 +43,20 @@ async def login():
     return {
         "access_token": token,
         "token_type": "bearer"
-
     }
 
-
-def get_current_user(
-    token: str = Depends(
-        oauth2_scheme
-    )
+async def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    db: AsyncSession = Depends(get_db)
 ):
-    payload = decode_access_token(
-        token
-    )
-
+    payload = decode_access_token(token)
     user_id = int(
         payload["sub"]
     )
 
-    repository = UserRepository()
+    repository = UserRepository(db)
 
-    user = repository.get_by_id(
+    user = await repository.get_by_id(
         user_id
     )
 
@@ -88,21 +70,59 @@ def get_current_user(
 
 
 @app.get("/profile")
-def profile(
-    current_user=Depends(
-        get_current_user
-    )
+async def profile(
+    current_user = Depends(get_current_user)
 ):
     return current_user
 
-@app.get("/projects/{project_id}")
-def get_project(
-    project_id: int
+
+@app.post("/projects")
+async def create_project(
+    project: ProjectCreate,
+    db: AsyncSession = Depends(get_db)
 ):
-    return service.get_project(
-        project_id,
-        projects
+    repository = ProjectRepository(db)
+    service = ProjectService(
+        repository
     )
+
+    return await service.create_project(
+        name=project.name,
+        user_id=project.user_id
+    )
+
+
+@app.get("/projects/{project_id}")
+async def get_project(
+    project_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    repository = ProjectRepository(db)
+    service = ProjectService(
+        repository
+    )
+
+    project = await service.get_project(
+        project_id
+    )
+
+    if not project:
+        raise ProjectNotFoundException()
+
+    return project
+
+
+@app.get("/projects")
+async def get_projects(
+    db: AsyncSession = Depends(get_db)
+):
+    repository = ProjectRepository(db)
+    service = ProjectService(
+        repository
+    )
+
+    return await service.get_projects()
+
 
 @app.exception_handler(
     ProjectNotFoundException
@@ -118,17 +138,100 @@ async def project_not_found_handler(
         }
     )
 
-@app.get("/projects")
-def get_projects(
-    skip: int = 0,
-    limit: int = 10
-):
-    return service.get_projects(
-        projects,
-        skip,
-        limit
-    )
 
 @app.get("/health")
-def health_check():
-    return {"status": "healthy"}
+async def health_check():
+    return {
+        "status": "healthy"
+    }
+
+@app.post("/users")
+async def create_user(
+    user: UserCreate,
+    db: AsyncSession = Depends(get_db)
+):
+    repository = UserRepository(db)
+
+    service = UserService(
+        repository
+    )
+
+    return await service.create_user(
+        name=user.name,
+        email=user.email
+    )
+
+
+@app.get("/users/{user_id}")
+async def get_user(
+    user_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    repository = UserRepository(db)
+
+    service = UserService(
+        repository
+    )
+
+    return await service.get_user(
+        user_id
+    )
+
+
+@app.get("/users")
+async def get_users(
+    db: AsyncSession = Depends(get_db)
+):
+    repository = UserRepository(db)
+
+    service = UserService(
+        repository
+    )
+
+    return await service.get_users()
+
+@app.post("/tasks")
+async def create_task(
+    task: TaskCreate,
+    db: AsyncSession = Depends(get_db)
+):
+    repository = TaskRepository(db)
+
+    service = TaskService(
+        repository
+    )
+
+    return await service.create_task(
+        title=task.title,
+        user_id=task.user_id,
+        project_id=task.project_id
+    )
+
+
+@app.get("/tasks/{task_id}")
+async def get_task(
+    task_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    repository = TaskRepository(db)
+
+    service = TaskService(
+        repository
+    )
+
+    return await service.get_task(
+        task_id
+    )
+
+
+@app.get("/tasks")
+async def get_tasks(
+    db: AsyncSession = Depends(get_db)
+):
+    repository = TaskRepository(db)
+
+    service = TaskService(
+        repository
+    )
+
+    return await service.get_tasks()

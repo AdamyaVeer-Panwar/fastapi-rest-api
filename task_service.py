@@ -1,14 +1,18 @@
 from models import Task
 from task_repository import TaskRepository
+from user_repository import UserRepository
+from fastapi import HTTPException
 
 
 class TaskService:
 
     def __init__(
         self,
-        repository: TaskRepository
+        repository: TaskRepository,
+        user_repository: UserRepository
     ):
         self.repository = repository
+        self.user_repository = user_repository
 
     async def create_task(
         self,
@@ -16,6 +20,11 @@ class TaskService:
         user_id: int,
         project_id: int
     ):
+        user = await self.user_repository.get_by_id(user_id)
+
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
         task = Task(
             title=title,
             user_id=user_id,
@@ -32,3 +41,5 @@ class TaskService:
 
     async def get_tasks(self):
         return await self.repository.get_all()
+    
+    
