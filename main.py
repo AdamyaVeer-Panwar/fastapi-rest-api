@@ -195,10 +195,16 @@ async def create_task(
     task: TaskCreate,
     db: AsyncSession = Depends(get_db)
 ):
-    repository = TaskRepository(db)
+    task_repository = TaskRepository(db)
+
+    user_repository = UserRepository(db)
+
+    project_repository = ProjectRepository(db)
 
     service = TaskService(
-        repository
+        task_repository,
+        user_repository,
+        project_repository
     )
 
     return await service.create_task(
