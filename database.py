@@ -5,6 +5,8 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import DeclarativeBase
 
+from sqlalchemy.pool import NullPool
+
 
 class Base(DeclarativeBase):
     pass
@@ -15,7 +17,8 @@ DATABASE_URL = (
 
 engine = create_async_engine(
     DATABASE_URL,
-    echo=True
+    echo=True,
+    poolclass=NullPool
 )
 
 AsyncSessionLocal = async_sessionmaker(
@@ -25,5 +28,11 @@ AsyncSessionLocal = async_sessionmaker(
 )
 
 async def get_db():
-    async with AsyncSessionLocal() as session:
-        yield session
+    db = AsyncSessionLocal()
+
+    try:
+        yield db
+
+    finally:
+        await db.close()
+        
