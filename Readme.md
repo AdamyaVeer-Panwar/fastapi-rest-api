@@ -4,6 +4,9 @@ A production-style backend application built with FastAPI, PostgreSQL, SQLAlchem
 
 This project demonstrates modern backend engineering practices including layered architecture, JWT authentication, database migrations, ORM relationships, dependency injection, containerization, and RESTful API design.
 
+## Architecture
+
+![Architecture Diagram](images/architecture-readme.png)
 ---
 
 ## Features
