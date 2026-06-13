@@ -1,55 +1,170 @@
-# Production-Ready REST API with FastAPI
+# Task Management Backend API
 
-A production-style REST API built using FastAPI that demonstrates clean backend architecture patterns including JWT authentication, dependency injection, service-repository separation, pagination, and centralized exception handling.
+A production-style backend application built with FastAPI, PostgreSQL, SQLAlchemy, Alembic, and Docker.
+
+This project demonstrates modern backend engineering practices including layered architecture, JWT authentication, database migrations, ORM relationships, dependency injection, containerization, and RESTful API design.
+
+---
 
 ## Features
 
-* JWT Authentication
-* Protected Endpoints
-* OAuth2 Bearer Token Flow
-* Repository Pattern
-* Service Layer Architecture
-* Dependency Injection
-* Pagination Support
-* Custom Exceptions
-* Global Exception Handling
-* Interactive Swagger Documentation
+### Authentication
 
-## Architecture
+* JWT Access Tokens
+* OAuth2 Bearer Authentication
+* Protected Endpoints
+* User Profile Retrieval
+
+### User Management
+
+* Create User
+* Get User By ID
+* List All Users
+
+### Project Management
+
+* Create Project
+* Get Project By ID
+* List All Projects
+* Associate Projects with Users
+
+### Task Management
+
+* Create Task
+* Get Task By ID
+* List All Tasks
+* Associate Tasks with Users
+* Associate Tasks with Projects
+
+### Database
+
+* PostgreSQL
+* SQLAlchemy ORM
+* Async Database Sessions
+* Foreign Key Relationships
+* Alembic Database Migrations
+
+### Engineering Practices
+
+* Repository Pattern
+* Service Layer Pattern
+* Dependency Injection
+* Centralized Exception Handling
+* Dockerized Deployment
+* Environment Variable Configuration
+
+---
+
+## Tech Stack
+
+### Backend
+
+* FastAPI
+* Python 3.12
+* Pydantic
+
+### Database
+
+* PostgreSQL
+* SQLAlchemy 2.0
+* AsyncPG
+
+### Authentication
+
+* JWT
+* OAuth2
+
+### Infrastructure
+
+* Docker
+* Docker Compose
+
+### Migrations
+
+* Alembic
+
+---
+
+## System Architecture
 
 ```text
 Client
-  ↓
-Route Layer
-  ↓
-Dependency Injection
-  ↓
+  │
+  ▼
+FastAPI Routes
+  │
+  ▼
 Service Layer
-  ↓
+  │
+  ▼
 Repository Layer
-  ↓
-Data Source
+  │
+  ▼
+SQLAlchemy ORM
+  │
+  ▼
+PostgreSQL
 ```
 
-### Responsibilities
+---
 
-#### Route Layer
+## Database Design
 
-* Handles HTTP requests and responses
-* Receives input from clients
-* Delegates business operations to services
+### Users
 
-#### Service Layer
+```text
+User
+├── id
+├── name
+├── email
+└── created_at
+```
 
-* Contains business logic
-* Coordinates application behavior
-* Raises business exceptions when required
+### Projects
 
-#### Repository Layer
+```text
+Project
+├── id
+├── name
+├── user_id
+└── created_at
+```
 
-* Handles data access
-* Retrieves and stores data
-* Returns raw data without business decisions
+### Tasks
+
+```text
+Task
+├── id
+├── title
+├── status
+├── user_id
+├── project_id
+└── created_at
+```
+
+---
+
+## Relationships
+
+```text
+User
+│
+├── Projects
+│
+└── Tasks
+
+Project
+│
+└── Tasks
+```
+
+### Relationship Types
+
+* One User → Many Projects
+* One User → Many Tasks
+* One Project → Many Tasks
+
+---
 
 ## API Endpoints
 
@@ -61,17 +176,48 @@ Data Source
 POST /login
 ```
 
-Returns a JWT access token.
+Returns JWT access token.
 
-### User
-
-#### Get Current User
+#### Profile
 
 ```http
 GET /profile
 ```
 
-Protected endpoint requiring a valid bearer token.
+Protected endpoint.
+
+---
+
+### Users
+
+#### Create User
+
+```http
+POST /users
+```
+
+Request:
+
+```json
+{
+  "name": "John Doe",
+  "email": "john@example.com"
+}
+```
+
+#### Get User
+
+```http
+GET /users/{user_id}
+```
+
+#### Get All Users
+
+```http
+GET /users
+```
+
+---
 
 ### Projects
 
@@ -85,8 +231,15 @@ Request:
 
 ```json
 {
-  "name": "Project Alpha"
+  "name": "Task Manager",
+  "user_id": 1
 }
+```
+
+#### Get Project
+
+```http
+GET /projects/{project_id}
 ```
 
 #### Get All Projects
@@ -95,86 +248,98 @@ Request:
 GET /projects
 ```
 
-Supports pagination:
+---
+
+### Tasks
+
+#### Create Task
 
 ```http
-GET /projects?skip=0&limit=10
+POST /tasks
 ```
 
-#### Get Project By ID
-
-```http
-GET /projects/{project_id}
-```
-
-Example:
-
-```http
-GET /projects/1
-```
-
-## Error Handling
-
-Custom exceptions are converted into meaningful HTTP responses using centralized exception handlers.
-
-Example:
+Request:
 
 ```json
 {
-  "detail": "Project not found"
+  "title": "Implement Authentication",
+  "user_id": 1,
+  "project_id": 1
 }
 ```
 
-Response:
+#### Get Task
 
 ```http
-404 Not Found
+GET /tasks/{task_id}
 ```
 
-## Technologies Used
+#### Get All Tasks
 
-* Python
-* FastAPI
-* Pydantic
-* JWT Authentication
-* Uvicorn
+```http
+GET /tasks
+```
 
-## Docker Features
+---
 
-This project includes production-oriented containerization practices:
+## Database Migrations
 
-* Multi-stage Docker build
-* Non-root container user
-* Health check endpoint (`/health`)
-* Docker HEALTHCHECK configuration
-* Slim Python base image (`python:3.12-slim`)
-* Reduced image size from ~426 MB to ~50 MB
-
-### Build Image
+Create migration:
 
 ```bash
-docker build -t fastapi-rest-api .
+alembic revision --autogenerate -m "migration message"
 ```
 
-### Run Container
+Apply migration:
 
 ```bash
-docker run -d -p 8000:8000 --name fastapi-api fastapi-rest-api
+alembic upgrade head
 ```
 
-### Verify Health
+Rollback migration:
 
 ```bash
-docker ps
+alembic downgrade -1
 ```
 
-Expected:
+---
+
+## Running with Docker
+
+Build and start services:
+
+```bash
+docker compose up --build
+```
+
+Services:
 
 ```text
-Up (healthy)
+FastAPI API
+PostgreSQL Database
 ```
 
-## Running Locally
+---
+
+## Environment Variables
+
+Create a `.env` file:
+
+```env
+DATABASE_URL=postgresql+asyncpg://postgres:password@db:5432/task_manager
+
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=password
+POSTGRES_DB=task_manager
+
+SECRET_KEY=your-secret-key
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+```
+
+---
+
+## Local Development
 
 Install dependencies:
 
@@ -182,35 +347,74 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-Start the server:
+Run server:
 
 ```bash
 uvicorn main:app --reload
 ```
 
-Open Swagger UI:
+Swagger Documentation:
 
 ```text
-http://127.0.0.1:8000/docs
+http://localhost:8000/docs
 ```
 
-## Learning Objectives
+ReDoc Documentation:
 
-This project was built to practice:
+```text
+http://localhost:8000/redoc
+```
 
-* Clean Architecture Principles
+---
+
+## Project Structure
+
+```text
+project/
+│
+├── main.py
+├── database.py
+├── config.py
+│
+├── models.py
+├── schemas.py
+│
+├── auth.py
+│
+├── user_repository.py
+├── project_repository.py
+├── task_repository.py
+│
+├── user_service.py
+├── project_service.py
+├── task_service.py
+│
+├── alembic/
+│
+├── Dockerfile
+├── docker-compose.yml
+│
+└── requirements.txt
+```
+
+---
+
+## Learning Outcomes
+
+This project was built to gain hands-on experience with:
+
+* FastAPI Development
 * REST API Design
+* PostgreSQL
+* SQLAlchemy ORM
+* Async Database Programming
+* Alembic Migrations
 * JWT Authentication
 * Dependency Injection
-* Service and Repository Patterns
-* Exception Handling
-* Pagination
-* FastAPI Development
-* Docker Fundamentals
-* Multi-Stage Docker Builds
-* Container Health Checks
-* Container Security (Non-Root User)
-* Production-Oriented Deployment Practices
+* Repository Pattern
+* Service Layer Architecture
+* Docker & Docker Compose
+* Production-Oriented Backend Development
 
 ```
 ```
