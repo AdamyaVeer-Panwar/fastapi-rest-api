@@ -27,6 +27,8 @@ from task_service import TaskService
 
 from schemas import TaskCreate
 
+from redis_client import redis_client
+
 app = FastAPI()
 
 oauth2_scheme = OAuth2PasswordBearer(
@@ -241,3 +243,20 @@ async def get_tasks(
     )
 
     return await service.get_tasks()
+
+
+@app.get("/redis-test")
+async def redis_test():
+
+    await redis_client.set(
+        "hello",
+        "world"
+    )
+
+    value = await redis_client.get(
+        "hello"
+    )
+
+    return {
+        "value": value
+    }
