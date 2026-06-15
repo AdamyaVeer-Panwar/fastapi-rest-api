@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth import create_access_token
 from auth import decode_access_token
+from auth import get_current_user
 
 from exceptions import ProjectNotFoundException
 
@@ -30,11 +31,9 @@ from schemas import UserUpdate
 
 from redis_client import redis_client
 
-app = FastAPI()
+from rate_limiter import rate_limiter
 
-oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="login"
-)
+app = FastAPI()
 
 @app.post("/login")
 async def login():
@@ -48,28 +47,7 @@ async def login():
         "token_type": "bearer"
     }
 
-async def get_current_user(
-    token: str = Depends(oauth2_scheme),
-    db: AsyncSession = Depends(get_db)
-):
-    payload = decode_access_token(token)
-    user_id = int(
-        payload["sub"]
-    )
 
-    repository = UserRepository(db)
-
-    user = await repository.get_by_id(
-        user_id
-    )
-
-    if not user:
-        raise HTTPException(
-            status_code=401,
-            detail="User not found"
-        )
-
-    return user
 
 
 @app.get("/profile")
@@ -168,8 +146,12 @@ async def create_user(
 @app.get("/users/{user_id}")
 async def get_user(
     user_id: int,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _: None = Depends(rate_limiter)
 ):
+    
+    print("GET USER ENDPOINT CALLED")
+    
     repository = UserRepository(db)
 
     service = UserService(
@@ -279,3 +261,4 @@ async def update_user(
         name=user.name,
         email=user.email
     )
+
