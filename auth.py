@@ -1,7 +1,7 @@
 from jose import jwt
 
 SECRET_KEY = "YOURSECRETKEY"
-ALGORITHM = "ALGO"
+ALGORITHM = "HS256"
 
 
 def create_access_token(user_id: int):

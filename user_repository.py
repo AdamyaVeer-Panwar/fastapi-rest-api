@@ -43,3 +43,28 @@ class UserRepository:
         result = await self.session.execute(query)
 
         return result.scalars().all()
+    
+
+    async def update(
+        self,
+        user_id: int,
+        name: str,
+        email: str
+    ):
+        user = await self.get_by_id(
+            user_id
+        )
+
+        if not user:
+            return None
+
+        user.name = name
+        user.email = email
+
+        await self.session.commit()
+
+        await self.session.refresh(
+            user
+        )
+
+        return user

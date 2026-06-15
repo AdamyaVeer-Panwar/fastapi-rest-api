@@ -66,3 +66,27 @@ class UserService:
 
     async def get_users(self):
         return await self.repository.get_all()
+    
+
+    async def update_user(
+        self,
+        user_id: int,
+        name: str,
+        email: str
+    ):
+        user = await self.repository.update(
+            user_id,
+            name,
+            email
+        )
+
+        if not user:
+            return None
+
+        cache_key = f"user:{user_id}"
+
+        await redis_client.delete(
+            cache_key
+        )
+
+        return user

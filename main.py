@@ -26,6 +26,7 @@ from task_repository import TaskRepository
 from task_service import TaskService
 
 from schemas import TaskCreate
+from schemas import UserUpdate
 
 from redis_client import redis_client
 
@@ -260,3 +261,21 @@ async def redis_test():
     return {
         "value": value
     }
+
+@app.put("/users/{user_id}")
+async def update_user(
+    user_id: int,
+    user: UserUpdate,
+    db: AsyncSession = Depends(get_db)
+):
+    repository = UserRepository(db)
+
+    service = UserService(
+        repository
+    )
+
+    return await service.update_user(
+        user_id=user_id,
+        name=user.name,
+        email=user.email
+    )

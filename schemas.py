@@ -18,4 +18,8 @@ class TaskCreate(BaseModel):
     project_id: int
 
 
+class UserUpdate(BaseModel):
+    name: str
+    email: str
+
 
