@@ -3,7 +3,7 @@ from task_repository import TaskRepository
 from user_repository import UserRepository
 from fastapi import HTTPException
 from project_repository import ProjectRepository
-
+from publisher import publish_event
 
 class TaskService:
 
@@ -18,18 +18,18 @@ class TaskService:
         self.project_repository = project_repository
 
     async def create_task(
-        self,
-        title: str,
-        user_id: int,
-        project_id: int
+    self,
+    title: str,
+    user_id: int,
+    project_id: int
     ):
         user = await self.user_repository.get_by_id(user_id)
 
         if not user:
             raise HTTPException(
-            status_code=404,
-            detail="User not found"
-        )
+                status_code=404,
+                detail="User not found"
+            )
 
         project = await self.project_repository.get_by_id(
         project_id
@@ -37,23 +37,35 @@ class TaskService:
 
         if not project:
             raise HTTPException(
-            status_code=404,
-            detail="Project not found"
-        )
+                status_code=404,
+                detail="Project not found"
+            )
 
         task = Task(
             title=title,
-            user_id=user_id,
+                user_id=user_id,
             project_id=project_id
         )
 
-        return await self.repository.create(task)
+        created_task = await self.repository.create(task)
 
-    async def get_task(
-        self,
-        task_id: int
-    ):
-        return await self.repository.get_by_id(task_id)
+        await publish_event(
+            "task_created",
+            {
+                "event": "task_created",
+                "task_id": created_task.id,
+                    "title": created_task.title,
+                "user_id": created_task.user_id,
+                "project_id": created_task.project_id
+            }
+        )
+
+        return created_task
+        async def get_task(
+            self,
+            task_id: int
+        ):
+            return await self.repository.get_by_id(task_id)
 
     async def get_tasks(self):
         return await self.repository.get_all()

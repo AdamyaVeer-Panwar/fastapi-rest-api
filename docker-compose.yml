@@ -50,5 +50,22 @@ services:
     ports:
       - "8000:8000"
 
+  notification_worker:
+    build: .
+
+    container_name: task_manager_notification_worker
+
+    command: python subscriber.py
+
+    env_file:
+    - .env
+
+    depends_on:
+      db:
+        condition: service_healthy
+    
+      redis:
+        condition: service_healthy
+
 volumes:
   postgres_data:
