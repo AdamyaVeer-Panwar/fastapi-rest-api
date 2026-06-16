@@ -8,7 +8,7 @@ This project demonstrates modern backend engineering practices including clean a
 
 ## Architecture
 
-![Architecture Diagram](images/architecture-readme.png)
+![Architecture Diagram](images/readme-architecture.png)
 
 ---
 
