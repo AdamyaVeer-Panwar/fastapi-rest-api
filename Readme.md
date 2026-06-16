@@ -1,119 +1,162 @@
 # Task Management Backend API
 
-A production-style backend application built with FastAPI, PostgreSQL, SQLAlchemy, Alembic, and Docker.
+A production-oriented, event-driven backend application built with FastAPI, PostgreSQL, Redis, SQLAlchemy, Alembic, and Docker.
 
-This project demonstrates modern backend engineering practices including layered architecture, JWT authentication, database migrations, ORM relationships, dependency injection, containerization, and RESTful API design.
+This project demonstrates modern backend engineering practices including clean architecture, JWT authentication, database migrations, asynchronous programming, Redis-based performance optimization, API protection, event-driven communication, background workers, containerization, and RESTful API design.
+
+---
 
 ## Architecture
 
 ![Architecture Diagram](images/architecture-readme.png)
+
 ---
 
-## Features
+# Features
 
-### Authentication
+## Authentication & Security
 
 * JWT Access Tokens
 * OAuth2 Bearer Authentication
-* Protected Endpoints
-* User Profile Retrieval
+* Protected API Endpoints
+* User Profile Authentication
+* API Rate Limiting using Redis
+* HTTP 429 Protection for Excessive Requests
 
-### User Management
+---
 
-* Create User
-* Get User By ID
-* List All Users
+## User Management
 
-### Project Management
+* Create Users
+* Retrieve Users by ID
+* Retrieve All Users
+* Redis Cache-Aside Pattern for User Retrieval
+* Cache TTL Management
+* Automatic Cache Invalidation after Updates
 
-* Create Project
-* Get Project By ID
+---
+
+## Project Management
+
+* Create Projects
+* Retrieve Projects by ID
 * List All Projects
 * Associate Projects with Users
 
-### Task Management
+---
 
-* Create Task
-* Get Task By ID
+## Task Management
+
+* Create Tasks
+* Retrieve Tasks by ID
 * List All Tasks
 * Associate Tasks with Users
 * Associate Tasks with Projects
 
-### Database
+---
 
-* PostgreSQL
-* SQLAlchemy ORM
-* Async Database Sessions
-* Foreign Key Relationships
-* Alembic Database Migrations
+## Event-Driven Notification System
 
-### Engineering Practices
+Task creation events are published asynchronously using Redis Pub/Sub.
 
-* Repository Pattern
-* Service Layer Pattern
-* Dependency Injection
-* Centralized Exception Handling
-* Dockerized Deployment
-* Environment Variable Configuration
+Features:
+
+* Redis Publisher
+* Redis Subscriber
+* Background Notification Worker
+* Decoupled Service Communication
+* Asynchronous Event Processing
 
 ---
 
-## Tech Stack
+## Database
 
-### Backend
+* PostgreSQL Database
+* SQLAlchemy 2.0 ORM
+* Async Database Sessions
+* Relational Database Modeling
+* Foreign Key Relationships
+* Alembic Database Migrations
 
-* FastAPI
+---
+
+## Backend Engineering Practices
+
+* Repository Pattern
+* Service Layer Architecture
+* Dependency Injection
+* Separation of Concerns
+* Centralized Error Handling
+* Environment-Based Configuration
+* Multi-Container Docker Architecture
+
+---
+
+# Technology Stack
+
+## Backend
+
 * Python 3.12
+* FastAPI
 * Pydantic
 
-### Database
+## Database
 
 * PostgreSQL
 * SQLAlchemy 2.0
 * AsyncPG
 
-### Authentication
+## Caching & Messaging
+
+* Redis
+* Redis Cache
+* Redis Pub/Sub
+* Redis Counters
+
+## Authentication
 
 * JWT
-* OAuth2
+* OAuth2 Password Bearer
 
-### Infrastructure
+## Infrastructure
 
 * Docker
 * Docker Compose
+* Multi-Container Services
 
-### Migrations
+## Database Migration
 
 * Alembic
 
 ---
 
-## System Architecture
+# High-Level System Architecture
 
 ```text
-Client
-  │
-  ▼
-FastAPI Routes
-  │
-  ▼
-Service Layer
-  │
-  ▼
-Repository Layer
-  │
-  ▼
-SQLAlchemy ORM
-  │
-  ▼
-PostgreSQL
+                          Client
+                             |
+                             v
+                        FastAPI API
+                             |
+        ------------------------------------------------
+        |                       |                      |
+        v                       v                      v
+   Service Layer            Redis                 PostgreSQL
+                                |
+                --------------------------------
+                |              |               |
+                v              v               v
+             Caching      Rate Limiting     Pub/Sub
+                                                |
+                                                v
+                                   Notification Worker
 ```
 
 ---
 
-## Database Design
+# Database Design
 
-### Users
+## Users Table
 
 ```text
 User
@@ -123,7 +166,9 @@ User
 └── created_at
 ```
 
-### Projects
+---
+
+## Projects Table
 
 ```text
 Project
@@ -133,7 +178,9 @@ Project
 └── created_at
 ```
 
-### Tasks
+---
+
+## Tasks Table
 
 ```text
 Task
@@ -147,59 +194,55 @@ Task
 
 ---
 
-## Relationships
+# Database Relationships
 
 ```text
 User
 │
-├── Projects
+├── Projects (One-to-Many)
 │
-└── Tasks
+└── Tasks (One-to-Many)
 
 Project
 │
-└── Tasks
+└── Tasks (One-to-Many)
 ```
-
-### Relationship Types
-
-* One User → Many Projects
-* One User → Many Tasks
-* One Project → Many Tasks
 
 ---
 
-## API Endpoints
+# API Endpoints
 
-### Authentication
+## Authentication
 
-#### Login
+### Login
 
 ```http
 POST /login
 ```
 
-Returns JWT access token.
+Returns a JWT access token.
 
-#### Profile
+---
+
+### Profile
 
 ```http
 GET /profile
 ```
 
-Protected endpoint.
+Requires Bearer authentication.
 
 ---
 
-### Users
+## Users
 
-#### Create User
+### Create User
 
 ```http
 POST /users
 ```
 
-Request:
+Example:
 
 ```json
 {
@@ -208,13 +251,19 @@ Request:
 }
 ```
 
-#### Get User
+---
+
+### Get User
 
 ```http
 GET /users/{user_id}
 ```
 
-#### Get All Users
+Protected endpoint with Redis rate limiting and caching.
+
+---
+
+### Get All Users
 
 ```http
 GET /users
@@ -222,30 +271,34 @@ GET /users
 
 ---
 
-### Projects
+## Projects
 
-#### Create Project
+### Create Project
 
 ```http
 POST /projects
 ```
 
-Request:
+Example:
 
 ```json
 {
-  "name": "Task Manager",
+  "name": "Backend System",
   "user_id": 1
 }
 ```
 
-#### Get Project
+---
+
+### Get Project
 
 ```http
 GET /projects/{project_id}
 ```
 
-#### Get All Projects
+---
+
+### List Projects
 
 ```http
 GET /projects
@@ -253,31 +306,37 @@ GET /projects
 
 ---
 
-### Tasks
+## Tasks
 
-#### Create Task
+### Create Task
 
 ```http
 POST /tasks
 ```
 
-Request:
+Example:
 
 ```json
 {
-  "title": "Implement Authentication",
+  "title": "Implement Redis Pub/Sub",
   "user_id": 1,
   "project_id": 1
 }
 ```
 
-#### Get Task
+This endpoint triggers an asynchronous Redis Pub/Sub event consumed by the notification worker.
+
+---
+
+### Get Task
 
 ```http
 GET /tasks/{task_id}
 ```
 
-#### Get All Tasks
+---
+
+### List Tasks
 
 ```http
 GET /tasks
@@ -285,21 +344,115 @@ GET /tasks
 
 ---
 
-## Database Migrations
+# Redis Implementation
 
-Create migration:
+## 1. Redis Caching
+
+Implemented using the Cache-Aside Pattern:
+
+```text
+Request
+   |
+   v
+Redis Cache
+   |
+Cache Hit  -> Return Data
+
+Cache Miss -> PostgreSQL -> Store in Redis
+```
+
+---
+
+## 2. Cache Invalidation
+
+To maintain consistency:
+
+```text
+Update PostgreSQL
+        |
+        v
+Delete Redis Cache Key
+```
+
+Database remains the source of truth.
+
+---
+
+## 3. Fixed Window Rate Limiting
+
+Implemented using Redis atomic operations:
+
+* INCR
+* EXPIRE
+* TTL
+
+Flow:
+
+```text
+Request
+   |
+Redis Counter
+   |
+Allowed Request
+   |
+OR
+   |
+HTTP 429 Too Many Requests
+```
+
+---
+
+## 4. Redis Pub/Sub Messaging
+
+```text
+Task Created
+     |
+     v
+Redis Publisher
+     |
+     v
+Redis Channel
+     |
+     v
+Notification Worker
+```
+
+Enables asynchronous, loosely coupled communication between services.
+
+---
+
+# Running with Docker
+
+Build and start all services:
+
+```bash
+docker compose up --build
+```
+
+Containers:
+
+* FastAPI API
+* PostgreSQL Database
+* Redis Server
+* Notification Worker
+
+---
+
+# Database Migrations
+
+Create a migration:
 
 ```bash
 alembic revision --autogenerate -m "migration message"
 ```
 
-Apply migration:
+Apply migrations:
 
 ```bash
 alembic upgrade head
 ```
 
-Rollback migration:
+Rollback the last migration:
 
 ```bash
 alembic downgrade -1
@@ -307,24 +460,7 @@ alembic downgrade -1
 
 ---
 
-## Running with Docker
-
-Build and start services:
-
-```bash
-docker compose up --build
-```
-
-Services:
-
-```text
-FastAPI API
-PostgreSQL Database
-```
-
----
-
-## Environment Variables
+# Environment Variables
 
 Create a `.env` file:
 
@@ -342,7 +478,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 
 ---
 
-## Local Development
+# Local Development
 
 Install dependencies:
 
@@ -350,19 +486,21 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-Run server:
+Run the development server:
 
 ```bash
 uvicorn main:app --reload
 ```
 
-Swagger Documentation:
+API Documentation:
+
+Swagger UI:
 
 ```text
 http://localhost:8000/docs
 ```
 
-ReDoc Documentation:
+ReDoc:
 
 ```text
 http://localhost:8000/redoc
@@ -370,19 +508,23 @@ http://localhost:8000/redoc
 
 ---
 
-## Project Structure
+# Project Structure
 
 ```text
 project/
 │
 ├── main.py
-├── database.py
 ├── config.py
+├── database.py
+│
+├── auth.py
+├── redis_client.py
+├── rate_limiter.py
+├── publisher.py
+├── subscriber.py
 │
 ├── models.py
 ├── schemas.py
-│
-├── auth.py
 │
 ├── user_repository.py
 ├── project_repository.py
@@ -402,22 +544,46 @@ project/
 
 ---
 
-## Learning Outcomes
+# Learning Outcomes
 
-This project was built to gain hands-on experience with:
+This project provided practical experience with:
 
-* FastAPI Development
+* Production-Style FastAPI Development
 * REST API Design
-* PostgreSQL
-* SQLAlchemy ORM
-* Async Database Programming
-* Alembic Migrations
-* JWT Authentication
+* Async Python Programming
+* PostgreSQL Database Design
+* SQLAlchemy Async ORM
+* Database Migrations with Alembic
+* JWT Authentication & OAuth2 Security
+* Repository and Service Layer Architecture
 * Dependency Injection
-* Repository Pattern
-* Service Layer Architecture
-* Docker & Docker Compose
-* Production-Oriented Backend Development
+* Redis Caching Strategies
+* Cache Invalidation Techniques
+* API Rate Limiting Algorithms
+* Event-Driven Architecture
+* Redis Pub/Sub Messaging
+* Background Worker Design
+* Docker Multi-Container Applications
+* Environment-Based Configuration
+* Scalable Backend System Design
 
-```
-```
+---
+
+# Future Improvements
+
+Planned enhancements include:
+
+* Automated Testing with Pytest
+* Integration Testing with Docker
+* CI/CD Pipelines using GitHub Actions
+* Structured Logging
+* Application Metrics and Monitoring
+* Celery-Based Background Jobs
+* Redis Streams and Consumer Groups
+* Production Deployment on Cloud Infrastructure
+
+---
+
+## Final Note
+
+This project evolved from a basic CRUD API into a production-oriented backend system demonstrating real-world engineering concepts such as caching, asynchronous communication, API protection, and scalable service design.
