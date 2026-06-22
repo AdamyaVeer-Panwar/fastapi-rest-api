@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_db
 from user_repository import UserRepository
 
-SECRET_KEY = "YOURSECURITYKEY"
+SECRET_KEY = "YOURSECRETKEY"
 ALGORITHM = "HS256"
 
 

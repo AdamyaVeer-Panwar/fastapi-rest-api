@@ -1,27 +1,57 @@
 import pytest
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, Mock, patch
 from fastapi import HTTPException
 
 from task_service import TaskService
 
 
-@pytest.mark.asyncio
-async def test_create_task_user_not_found():
+# =========================
+# Fixtures
+# =========================
 
-    task_repository = AsyncMock()
-    user_repository = AsyncMock()
-    project_repository = AsyncMock()
+@pytest.fixture
+def task_repository():
+    return AsyncMock()
 
-    user_repository.get_by_id.return_value = None
 
-    service = TaskService(
+@pytest.fixture
+def user_repository():
+    return AsyncMock()
+
+
+@pytest.fixture
+def project_repository():
+    return AsyncMock()
+
+
+@pytest.fixture
+def task_service(
+    task_repository,
+    user_repository,
+    project_repository
+):
+    return TaskService(
         repository=task_repository,
         user_repository=user_repository,
         project_repository=project_repository
     )
 
+
+# =========================
+# Tests
+# =========================
+
+@pytest.mark.asyncio
+async def test_create_task_user_not_found(
+    task_service,
+    user_repository
+):
+    # Given
+    user_repository.get_by_id.return_value = None
+
+    # When / Then
     with pytest.raises(HTTPException) as exc_info:
-        await service.create_task(
+        await task_service.create_task(
             title="Test Task",
             user_id=999,
             project_id=1
@@ -32,24 +62,18 @@ async def test_create_task_user_not_found():
 
 
 @pytest.mark.asyncio
-async def test_create_task_project_not_found():
-
-    task_repository = AsyncMock()
-    user_repository = AsyncMock()
-    project_repository = AsyncMock()
-
-    user_repository.get_by_id.return_value = object()
-
+async def test_create_task_project_not_found(
+    task_service,
+    user_repository,
+    project_repository
+):
+    # Given
+    user_repository.get_by_id.return_value = Mock()
     project_repository.get_by_id.return_value = None
 
-    service = TaskService(
-        repository=task_repository,
-        user_repository=user_repository,
-        project_repository=project_repository
-    )
-
+    # When / Then
     with pytest.raises(HTTPException) as exc_info:
-        await service.create_task(
+        await task_service.create_task(
             title="Test Task",
             user_id=1,
             project_id=999
@@ -60,30 +84,48 @@ async def test_create_task_project_not_found():
 
 
 @pytest.mark.asyncio
-async def test_create_task_success():
+async def test_create_task_success(
+    task_service,
+    task_repository,
+    user_repository,
+    project_repository
+):
+    # Given
+    user_repository.get_by_id.return_value = Mock()
+    project_repository.get_by_id.return_value = Mock()
 
-    task_repository = AsyncMock()
-    user_repository = AsyncMock()
-    project_repository = AsyncMock()
-
-    user_repository.get_by_id.return_value = object()
-
-    project_repository.get_by_id.return_value = object()
-
-    fake_task = object()
+    fake_task = Mock()
+    fake_task.id = 1
+    fake_task.title = "Test Task"
+    fake_task.user_id = 1
+    fake_task.project_id = 1
 
     task_repository.create.return_value = fake_task
 
-    service = TaskService(
-        repository=task_repository,
-        user_repository=user_repository,
-        project_repository=project_repository
-    )
+    # Mock external Redis event publisher
+    with patch("task_service.publish_event", new_callable=AsyncMock) as mock_publish:
 
-    result = await service.create_task(
-        title="Test Task",
-        user_id=1,
-        project_id=1
-    )
+        # When
+        result = await task_service.create_task(
+            title="Test Task",
+            user_id=1,
+            project_id=1
+        )
 
-    assert result == fake_task
+        # Then - returned task is correct
+        assert result == fake_task
+
+        # Then - repository was called correctly
+        task_repository.create.assert_awaited_once()
+
+        # Then - event was published
+        mock_publish.assert_awaited_once_with(
+            "task_created",
+            {
+                "event": "task_created",
+                "task_id": 1,
+                "title": "Test Task",
+                "user_id": 1,
+                "project_id": 1
+            }
+        )
