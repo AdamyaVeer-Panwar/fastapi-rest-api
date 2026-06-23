@@ -9,20 +9,6 @@ from task_service import TaskService
 # Fixtures
 # =========================
 
-@pytest.fixture
-def task_repository():
-    return AsyncMock()
-
-
-@pytest.fixture
-def user_repository():
-    return AsyncMock()
-
-
-@pytest.fixture
-def project_repository():
-    return AsyncMock()
-
 
 @pytest.fixture
 def task_service(
