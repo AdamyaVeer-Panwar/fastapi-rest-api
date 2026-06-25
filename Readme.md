@@ -1,14 +1,14 @@
 # Task Management Backend API
 
-A production-oriented, event-driven backend application built with FastAPI, PostgreSQL, Redis, SQLAlchemy, Alembic, and Docker.
+A production-oriented asynchronous backend system built with FastAPI, PostgreSQL, Redis, SQLAlchemy, Alembic, Docker, and automated API testing.
 
-This project demonstrates modern backend engineering practices including clean architecture, JWT authentication, database migrations, asynchronous programming, Redis-based performance optimization, API protection, event-driven communication, background workers, containerization, and RESTful API design.
+This project demonstrates modern backend engineering practices including clean architecture, JWT authentication, database migrations, asynchronous programming, Redis-based performance optimization, API protection, event-driven communication, background workers, containerization, asynchronous integration testing and RESTful API design.
 
 ---
 
 ## Architecture
 
-![Architecture Diagram](images/readme-architecture.png)
+![Architecture Diagram](images/clean-architecture-api-readme.png)
 
 ---
 
@@ -85,12 +85,62 @@ Features:
 * Repository Pattern
 * Service Layer Architecture
 * Dependency Injection
+* Async-First Design
 * Separation of Concerns
+* Testable Application Architecture
 * Centralized Error Handling
 * Environment-Based Configuration
+* Database Session Lifecycle Management
 * Multi-Container Docker Architecture
-
 ---
+
+# Testing
+
+The project includes asynchronous API integration testing using:
+
+* Pytest
+* Pytest-Asyncio
+* HTTPX AsyncClient
+* FastAPI Dependency Overrides
+* Dedicated PostgreSQL Test Database
+
+## Current Test Coverage
+
+### User API
+
+* Create User Endpoint
+* Retrieve All Users Endpoint
+
+### Validation Coverage
+
+* Database Session Management
+* Dependency Injection Overrides
+* Async Request Lifecycle
+* PostgreSQL Integration
+* SQLAlchemy Async Operations
+
+## Test Architecture
+
+```text
+Pytest
+   |
+   v
+HTTPX AsyncClient
+   |
+   v
+FastAPI Application
+   |
+Dependency Override
+   |
+   v
+Test PostgreSQL Database
+```
+
+## Run Tests
+
+```bash
+pytest tests -v
+```
 
 # Technology Stack
 
@@ -544,6 +594,38 @@ project/
 
 ---
 
+# Engineering Highlights
+
+This project demonstrates production-oriented backend engineering practices:
+
+✅ Async FastAPI Architecture
+
+✅ PostgreSQL + SQLAlchemy Async ORM
+
+✅ Repository and Service Layer Pattern
+
+✅ Dependency Injection
+
+✅ JWT Authentication
+
+✅ Redis Caching
+
+✅ Redis Pub/Sub Messaging
+
+✅ Fixed Window Rate Limiting
+
+✅ Alembic Database Migrations
+
+✅ Docker Multi-Container Deployment
+
+✅ API Integration Testing
+
+✅ Dedicated Test Database
+
+✅ Clean Layered Architecture
+
+---
+
 # Learning Outcomes
 
 This project provided practical experience with:
@@ -573,15 +655,28 @@ This project provided practical experience with:
 
 Planned enhancements include:
 
-* Automated Testing with Pytest
-* Integration Testing with Docker
-* CI/CD Pipelines using GitHub Actions
-* Structured Logging
-* Application Metrics and Monitoring
-* Celery-Based Background Jobs
-* Redis Streams and Consumer Groups
-* Production Deployment on Cloud Infrastructure
+* Test Coverage Expansion
+    * Project APIs
+    * Task APIs
+    * Authentication APIs
+    * Rate Limiting Validation
+    * Redis Cache Validation
 
+* CI/CD Pipelines using GitHub Actions
+
+* Structured Logging
+
+* Application Metrics and Monitoring
+
+* Celery-Based Distributed Background Jobs
+
+* Redis Streams and Consumer Groups
+
+* Kubernetes Deployment
+
+* Cloud Deployment (AWS/GCP/Azure)
+
+* OpenTelemetry Distributed Tracing
 ---
 
 ## Final Note
