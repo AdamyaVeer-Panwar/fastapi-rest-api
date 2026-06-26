@@ -7,7 +7,6 @@ from database import get_db
 
 @pytest.fixture
 def client(db_session):
-
     async def override_get_db():
         yield db_session
 

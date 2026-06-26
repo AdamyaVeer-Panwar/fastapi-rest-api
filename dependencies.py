@@ -4,16 +4,8 @@ from project_service import ProjectService
 
 
 def get_project_repository():
-
     return ProjectRepository()
 
 
-def get_project_service(
-    repository=Depends(
-        get_project_repository
-    )
-):
-
-    return ProjectService(
-        repository
-    )
+def get_project_service(repository=Depends(get_project_repository)):
+    return ProjectService(repository)

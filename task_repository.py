@@ -5,17 +5,10 @@ from models import Task
 
 
 class TaskRepository:
-
-    def __init__(
-        self,
-        session: AsyncSession
-    ):
+    def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def create(
-        self,
-        task: Task
-    ):
+    async def create(self, task: Task):
         self.session.add(task)
 
         await self.session.commit()
@@ -24,13 +17,8 @@ class TaskRepository:
 
         return task
 
-    async def get_by_id(
-        self,
-        task_id: int
-    ):
-        query = select(Task).where(
-            Task.id == task_id
-        )
+    async def get_by_id(self, task_id: int):
+        query = select(Task).where(Task.id == task_id)
 
         result = await self.session.execute(query)
 

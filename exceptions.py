@@ -1,4 +1,2 @@
-
-
 class ProjectNotFoundException(Exception):
     pass

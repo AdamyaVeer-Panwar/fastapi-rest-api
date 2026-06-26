@@ -6,13 +6,9 @@ from models import User
 
 @pytest.mark.asyncio
 async def test_create_user(db_session):
-
     repository = UserRepository(db_session)
 
-    user = User(
-        name="Adamya",
-        email="adamya@example.com"
-    )
+    user = User(name="Adamya", email="adamya@example.com")
 
     created_user = await repository.create(user)
 

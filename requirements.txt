@@ -7,3 +7,9 @@ asyncpg
 sqlalchemy
 alembic==1.16.0
 redis
+pytest
+pytest-asyncio
+httpx
+ruff
+black
+pre-commit

@@ -1,8 +1,4 @@
-from sqlalchemy.ext.asyncio import (
-    create_async_engine,
-    AsyncSession,
-    async_sessionmaker
-)
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import NullPool
 
@@ -27,7 +23,6 @@ def create_engine(database_url: str):
     return create_async_engine(
         database_url,
         echo=False,
-
         # IMPORTANT:
         # In tests, connection pooling often causes hidden state leakage.
         # NullPool ensures each connection is fresh and isolated.

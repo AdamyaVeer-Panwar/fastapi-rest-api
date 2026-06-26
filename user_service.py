@@ -4,89 +4,50 @@ import json
 
 from redis_client import redis_client
 
-class UserService:
 
-    def __init__(
-        self,
-        repository: UserRepository
-    ):
+class UserService:
+    def __init__(self, repository: UserRepository):
         self.repository = repository
 
-    async def create_user(
-        self,
-        name: str,
-        email: str
-    ):
-        user = User(
-            name=name,
-            email=email
-        )
+    async def create_user(self, name: str, email: str):
+        user = User(name=name, email=email)
 
         return await self.repository.create(user)
 
-    async def get_user(
-        self,
-        user_id: int
-    ):
+    async def get_user(self, user_id: int):
         cache_key = f"user:{user_id}"
 
-        cached_user = await redis_client.get(
-            cache_key
-        )
+        cached_user = await redis_client.get(cache_key)
 
         if cached_user:
             print("CACHE HIT")
 
-            return json.loads(
-                cached_user
-            )
+            return json.loads(cached_user)
 
         print("CACHE MISS")
 
-        user = await self.repository.get_by_id(
-            user_id
-        )
+        user = await self.repository.get_by_id(user_id)
 
         if not user:
             return None
 
-        user_data = {
-            "id": user.id,
-            "name": user.name,
-            "email": user.email
-        }
+        user_data = {"id": user.id, "name": user.name, "email": user.email}
 
-        await redis_client.set(
-            cache_key,
-            json.dumps(user_data),
-            ex=300
-        )
+        await redis_client.set(cache_key, json.dumps(user_data), ex=300)
 
         return user_data
 
     async def get_users(self):
         return await self.repository.get_all()
-    
 
-    async def update_user(
-        self,
-        user_id: int,
-        name: str,
-        email: str
-    ):
-        user = await self.repository.update(
-            user_id,
-            name,
-            email
-        )
+    async def update_user(self, user_id: int, name: str, email: str):
+        user = await self.repository.update(user_id, name, email)
 
         if not user:
             return None
 
         cache_key = f"user:{user_id}"
 
-        await redis_client.delete(
-            cache_key
-        )
+        await redis_client.delete(cache_key)
 
         return user

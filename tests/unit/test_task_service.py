@@ -11,15 +11,11 @@ from task_service import TaskService
 
 
 @pytest.fixture
-def task_service(
-    task_repository,
-    user_repository,
-    project_repository
-):
+def task_service(task_repository, user_repository, project_repository):
     return TaskService(
         repository=task_repository,
         user_repository=user_repository,
-        project_repository=project_repository
+        project_repository=project_repository,
     )
 
 
@@ -27,21 +23,15 @@ def task_service(
 # Tests
 # =========================
 
+
 @pytest.mark.asyncio
-async def test_create_task_user_not_found(
-    task_service,
-    user_repository
-):
+async def test_create_task_user_not_found(task_service, user_repository):
     # Given
     user_repository.get_by_id.return_value = None
 
     # When / Then
     with pytest.raises(HTTPException) as exc_info:
-        await task_service.create_task(
-            title="Test Task",
-            user_id=999,
-            project_id=1
-        )
+        await task_service.create_task(title="Test Task", user_id=999, project_id=1)
 
     assert exc_info.value.status_code == 404
     assert exc_info.value.detail == "User not found"
@@ -49,9 +39,7 @@ async def test_create_task_user_not_found(
 
 @pytest.mark.asyncio
 async def test_create_task_project_not_found(
-    task_service,
-    user_repository,
-    project_repository
+    task_service, user_repository, project_repository
 ):
     # Given
     user_repository.get_by_id.return_value = Mock()
@@ -59,11 +47,7 @@ async def test_create_task_project_not_found(
 
     # When / Then
     with pytest.raises(HTTPException) as exc_info:
-        await task_service.create_task(
-            title="Test Task",
-            user_id=1,
-            project_id=999
-        )
+        await task_service.create_task(title="Test Task", user_id=1, project_id=999)
 
     assert exc_info.value.status_code == 404
     assert exc_info.value.detail == "Project not found"
@@ -71,10 +55,7 @@ async def test_create_task_project_not_found(
 
 @pytest.mark.asyncio
 async def test_create_task_success(
-    task_service,
-    task_repository,
-    user_repository,
-    project_repository
+    task_service, task_repository, user_repository, project_repository
 ):
     # Given
     user_repository.get_by_id.return_value = Mock()
@@ -90,12 +71,9 @@ async def test_create_task_success(
 
     # Mock external Redis event publisher
     with patch("task_service.publish_event", new_callable=AsyncMock) as mock_publish:
-
         # When
         result = await task_service.create_task(
-            title="Test Task",
-            user_id=1,
-            project_id=1
+            title="Test Task", user_id=1, project_id=1
         )
 
         # Then - returned task is correct
@@ -112,6 +90,6 @@ async def test_create_task_success(
                 "task_id": 1,
                 "title": "Test Task",
                 "user_id": 1,
-                "project_id": 1
-            }
+                "project_id": 1,
+            },
         )

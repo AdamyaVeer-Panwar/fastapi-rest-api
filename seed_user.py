@@ -6,11 +6,7 @@ from database import AsyncSessionLocal
 
 async def main():
     async with AsyncSessionLocal() as session:
-
-        user = User(
-            email="adamya@example.com",
-            name="Adamya"
-        )
+        user = User(email="adamya@example.com", name="Adamya")
 
         session.add(user)
 
