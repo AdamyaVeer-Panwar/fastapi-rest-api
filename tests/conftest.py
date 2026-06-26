@@ -1,22 +1,28 @@
-import pytest_asyncio
-from httpx import AsyncClient, ASGITransport
+import os
+from unittest.mock import AsyncMock
 
+import pytest
+import pytest_asyncio
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import (
-    create_async_engine,
     async_sessionmaker,
+    create_async_engine,
 )
 
 from database import Base, get_db
 from main import app
-import os
 
-
+# -----------------------------
+# Test Database Configuration
+# -----------------------------
 TEST_DATABASE_URL = os.getenv(
     "TEST_DATABASE_URL",
-    "postgresql+asyncpg://postgres:YOUR_PASSWORD@localhost:5432/test_db",
+    "postgresql+asyncpg://postgres:postgres@localhost:5432/test_db",
 )
 
-# --- Engine (session scoped, not per test) ---
+# -----------------------------
+# Test Engine & Session Factory
+# -----------------------------
 test_engine = create_async_engine(
     TEST_DATABASE_URL,
     echo=False,
@@ -29,7 +35,7 @@ TestingSessionLocal = async_sessionmaker(
 
 
 # -----------------------------
-# DB Lifecycle (IMPORTANT)
+# Database Lifecycle
 # -----------------------------
 @pytest_asyncio.fixture(scope="session", autouse=True)
 async def setup_database():
@@ -45,7 +51,16 @@ async def setup_database():
 
 
 # -----------------------------
-# DB override dependency
+# Database Session Fixture
+# -----------------------------
+@pytest_asyncio.fixture
+async def db_session():
+    async with TestingSessionLocal() as session:
+        yield session
+
+
+# -----------------------------
+# FastAPI Dependency Override
 # -----------------------------
 async def override_get_db():
     async with TestingSessionLocal() as session:
@@ -56,7 +71,7 @@ app.dependency_overrides[get_db] = override_get_db
 
 
 # -----------------------------
-# HTTP client fixture
+# HTTP Client Fixture
 # -----------------------------
 @pytest_asyncio.fixture
 async def client():
@@ -65,3 +80,21 @@ async def client():
         base_url="http://test",
     ) as client:
         yield client
+
+
+# -----------------------------
+# Mock Repository Fixtures
+# -----------------------------
+@pytest.fixture
+def task_repository():
+    return AsyncMock()
+
+
+@pytest.fixture
+def user_repository():
+    return AsyncMock()
+
+
+@pytest.fixture
+def project_repository():
+    return AsyncMock()
