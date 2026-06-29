@@ -1,14 +1,71 @@
 # Task Management Backend API
 
-A production-oriented asynchronous backend system built with FastAPI, PostgreSQL, Redis, SQLAlchemy, Alembic, Docker, and automated API testing.
+> A production-grade backend system built with **FastAPI**, **PostgreSQL**, **Redis**, **Docker**, and **GitHub Actions**, demonstrating modern backend engineering practices including layered architecture, asynchronous programming, automated testing, containerization, continuous integration, caching, and event-driven communication.
 
-This project demonstrates modern backend engineering practices including clean architecture, JWT authentication, database migrations, asynchronous programming, Redis-based performance optimization, API protection, event-driven communication, background workers, containerization, asynchronous integration testing and RESTful API design.
+
+
+# Why This Project?
+
+This project was built to move beyond a traditional CRUD application and explore how **production backend systems** are engineered.
+
+Instead of focusing only on API development, the project demonstrates software engineering practices commonly used in real-world backend services:
+
+- Layered (Clean) Architecture
+- Repository & Service Pattern
+- Dependency Injection
+- JWT Authentication
+- Redis Caching
+- Redis Rate Limiting
+- Event-Driven Communication
+- Automated Testing
+- Dockerized Development
+- Continuous Integration
+- Container Image Publishing
+
+The goal is to build software that is **maintainable, testable, scalable, and production-oriented**.
 
 ---
 
-## Architecture
+# Architecture
 
 ![Architecture Diagram](images/clean-architecture-api-readme.png)
+
+---
+
+# Engineering Highlights
+
+- Async-first FastAPI application
+- PostgreSQL with SQLAlchemy 2.0 Async ORM
+- Redis Cache-Aside Pattern
+- Redis Pub/Sub Event System
+- Redis-based Fixed Window Rate Limiting
+- Repository & Service Layer Architecture
+- Dependency Injection
+- JWT Authentication
+- Docker Multi-Container Deployment
+- GitHub Actions Continuous Integration
+- GitHub Container Registry (GHCR) Image Publishing
+- Automated API, Integration and Service Tests
+- Alembic Database Migrations
+
+---
+
+# Technology Stack
+
+| Category | Technologies |
+|-----------|--------------|
+| Language | Python 3.12 |
+| Framework | FastAPI |
+| Database | PostgreSQL |
+| ORM | SQLAlchemy 2.0 (Async) |
+| Cache | Redis |
+| Messaging | Redis Pub/Sub |
+| Authentication | JWT + OAuth2 |
+| Testing | Pytest, HTTPX, pytest-asyncio |
+| Database Migration | Alembic |
+| Containerization | Docker, Docker Compose |
+| CI | GitHub Actions |
+| Registry | GitHub Container Registry (GHCR) |
 
 ---
 
@@ -16,458 +73,477 @@ This project demonstrates modern backend engineering practices including clean a
 
 ## Authentication & Security
 
-* JWT Access Tokens
-* OAuth2 Bearer Authentication
-* Protected API Endpoints
-* User Profile Authentication
-* API Rate Limiting using Redis
-* HTTP 429 Protection for Excessive Requests
+- JWT Authentication
+- OAuth2 Password Bearer
+- Protected API Endpoints
+- User Profile Endpoint
+- Redis Rate Limiting
+- HTTP 429 Protection
 
 ---
 
 ## User Management
 
-* Create Users
-* Retrieve Users by ID
-* Retrieve All Users
-* Redis Cache-Aside Pattern for User Retrieval
-* Cache TTL Management
-* Automatic Cache Invalidation after Updates
+- Create User
+- Get User
+- List Users
+- Redis Cache-Aside Pattern
+- Cache Invalidation
+- Configurable Cache TTL
 
 ---
 
 ## Project Management
 
-* Create Projects
-* Retrieve Projects by ID
-* List All Projects
-* Associate Projects with Users
+- Create Project
+- Get Project
+- List Projects
+- User-Project Relationships
 
 ---
 
 ## Task Management
 
-* Create Tasks
-* Retrieve Tasks by ID
-* List All Tasks
-* Associate Tasks with Users
-* Associate Tasks with Projects
+- Create Task
+- Get Task
+- List Tasks
+- User-Task Relationships
+- Project-Task Relationships
 
 ---
 
-## Event-Driven Notification System
+## Event-Driven Communication
 
-Task creation events are published asynchronously using Redis Pub/Sub.
+Task creation automatically publishes an event using Redis Pub/Sub.
 
-Features:
-
-* Redis Publisher
-* Redis Subscriber
-* Background Notification Worker
-* Decoupled Service Communication
-* Asynchronous Event Processing
+A dedicated background worker asynchronously consumes the event, demonstrating decoupled service communication.
 
 ---
 
-## Database
-
-* PostgreSQL Database
-* SQLAlchemy 2.0 ORM
-* Async Database Sessions
-* Relational Database Modeling
-* Foreign Key Relationships
-* Alembic Database Migrations
-
----
-
-## Backend Engineering Practices
-
-* Repository Pattern
-* Service Layer Architecture
-* Dependency Injection
-* Async-First Design
-* Separation of Concerns
-* Testable Application Architecture
-* Centralized Error Handling
-* Environment-Based Configuration
-* Database Session Lifecycle Management
-* Multi-Container Docker Architecture
----
-
-# Testing
-
-The project includes asynchronous API integration testing using:
-
-* Pytest
-* Pytest-Asyncio
-* HTTPX AsyncClient
-* FastAPI Dependency Overrides
-* Dedicated PostgreSQL Test Database
-
-## Current Test Coverage
-
-### User API
-
-* Create User Endpoint
-* Retrieve All Users Endpoint
-
-### Validation Coverage
-
-* Database Session Management
-* Dependency Injection Overrides
-* Async Request Lifecycle
-* PostgreSQL Integration
-* SQLAlchemy Async Operations
-
-## Test Architecture
+# System Architecture
 
 ```text
-Pytest
-   |
-   v
-HTTPX AsyncClient
-   |
-   v
-FastAPI Application
-   |
-Dependency Override
-   |
-   v
-Test PostgreSQL Database
-```
-
-## Run Tests
-
-```bash
-pytest tests -v
-```
-
-# Technology Stack
-
-## Backend
-
-* Python 3.12
-* FastAPI
-* Pydantic
-
-## Database
-
-* PostgreSQL
-* SQLAlchemy 2.0
-* AsyncPG
-
-## Caching & Messaging
-
-* Redis
-* Redis Cache
-* Redis Pub/Sub
-* Redis Counters
-
-## Authentication
-
-* JWT
-* OAuth2 Password Bearer
-
-## Infrastructure
-
-* Docker
-* Docker Compose
-* Multi-Container Services
-
-## Database Migration
-
-* Alembic
-
----
-
-# High-Level System Architecture
-
-```text
-                          Client
-                             |
-                             v
-                        FastAPI API
-                             |
-        ------------------------------------------------
-        |                       |                      |
-        v                       v                      v
-   Service Layer            Redis                 PostgreSQL
-                                |
-                --------------------------------
-                |              |               |
-                v              v               v
-             Caching      Rate Limiting     Pub/Sub
-                                                |
-                                                v
+                        Client
+                           │
+                           ▼
+                    FastAPI Application
+                           │
+        ┌──────────────────┼──────────────────┐
+        │                  │                  │
+        ▼                  ▼                  ▼
+ Authentication       Service Layer        Redis
+        │                  │                  │
+        ▼                  ▼                  │
+ Repository Layer     Business Logic         │
+        │                                     │
+        ▼                                     ▼
+ PostgreSQL                        Cache • Rate Limit • Pub/Sub
+                                              │
+                                              ▼
                                    Notification Worker
 ```
 
 ---
 
-# Database Design
+# Clean Architecture
 
-## Users Table
+The application follows a layered architecture where each layer has a single responsibility.
 
 ```text
-User
-├── id
-├── name
-├── email
-└── created_at
+                HTTP Request
+                     │
+                     ▼
+                 API Router
+                     │
+                     ▼
+               Service Layer
+                     │
+                     ▼
+            Repository Layer
+                     │
+                     ▼
+                PostgreSQL
 ```
+
+### Responsibilities
+
+| Layer | Responsibility |
+|--------|----------------|
+| Router | Request validation & routing |
+| Service | Business logic |
+| Repository | Database access |
+| Database | Data persistence |
+
+This separation improves maintainability, testing, and scalability.
 
 ---
 
-## Projects Table
+# Request Lifecycle
+
+A typical request flows through the application as follows:
 
 ```text
-Project
-├── id
-├── name
-├── user_id
-└── created_at
+Client
+   │
+   ▼
+FastAPI Router
+   │
+Dependency Injection
+   │
+   ▼
+Service Layer
+   │
+Business Rules
+   │
+   ▼
+Repository
+   │
+SQLAlchemy
+   │
+   ▼
+PostgreSQL
 ```
+
+This design keeps HTTP logic separate from business logic and database operations.
 
 ---
 
-## Tasks Table
+# Redis Architecture
+
+Redis is used for three independent responsibilities.
+
+## 1. Cache-Aside Pattern
 
 ```text
-Task
-├── id
-├── title
-├── status
-├── user_id
-├── project_id
-└── created_at
+Client Request
+      │
+      ▼
+ Redis Cache
+  │        │
+Hit      Miss
+ │         │
+ ▼         ▼
+Return   PostgreSQL
+             │
+             ▼
+      Store in Cache
 ```
+
+Benefits:
+
+- Faster response times
+- Reduced database load
+- Improved scalability
 
 ---
 
-# Database Relationships
+## 2. Fixed Window Rate Limiting
 
 ```text
-User
+Incoming Request
+        │
+        ▼
+Redis Counter (INCR)
+        │
+        ▼
+Limit Reached?
+   │          │
+ No         Yes
+ │            │
+ ▼            ▼
+Allow     HTTP 429
+```
+
+Implemented using Redis atomic operations:
+
+- INCR
+- EXPIRE
+- TTL
+
+---
+
+## 3. Event-Driven Messaging
+
+Whenever a task is created:
+
+```text
+Task Created
+      │
+      ▼
+Publisher
+      │
+      ▼
+ Redis Channel
+      │
+      ▼
+Notification Worker
+```
+
+This enables asynchronous communication between independent services.
+
+---
+
+# Project Structure
+
+```text
+project/
 │
-├── Projects (One-to-Many)
+├── alembic/
+├── tests/
 │
-└── Tasks (One-to-Many)
-
-Project
+├── auth.py
+├── config.py
+├── database.py
+├── main.py
+├── models.py
+├── schemas.py
 │
-└── Tasks (One-to-Many)
+├── user_repository.py
+├── project_repository.py
+├── task_repository.py
+│
+├── user_service.py
+├── project_service.py
+├── task_service.py
+│
+├── publisher.py
+├── subscriber.py
+├── redis_client.py
+├── rate_limiter.py
+│
+├── Dockerfile
+├── docker-compose.yml
+├── requirements.txt
+└── README.md
 ```
 
 ---
 
-# API Endpoints
+# Design Principles
+
+This project emphasizes production-oriented engineering principles rather than simply implementing REST endpoints.
+
+- Separation of Concerns
+- Single Responsibility Principle
+- Dependency Injection
+- Repository Pattern
+- Service Layer Architecture
+- Async-First Programming
+- Environment-Based Configuration
+- Containerized Development
+- Automated Quality Checks
+- Scalable System Design
+
+---
+
+# Testing Strategy
+
+Quality is enforced through automated testing at multiple levels to validate business logic, API behavior, and database interactions.
+
+## Test Stack
+
+| Tool | Purpose |
+|------|---------|
+| Pytest | Test framework |
+| pytest-asyncio | Async test support |
+| HTTPX AsyncClient | API integration testing |
+| unittest.mock | Service mocking |
+| PostgreSQL Test Database | Isolated integration tests |
+
+---
+
+## Current Test Coverage
+
+- User API endpoints
+- User repository
+- Task service business logic
+- Dependency injection overrides
+- Async database sessions
+- HTTP request lifecycle
+
+---
+
+## Test Architecture
+
+```text
+              Pytest
+                 │
+                 ▼
+        HTTPX AsyncClient
+                 │
+                 ▼
+          FastAPI Application
+                 │
+      Dependency Overrides
+                 │
+                 ▼
+      PostgreSQL Test Database
+```
+
+Run the test suite:
+
+```bash
+pytest -v
+```
+
+---
+
+# Continuous Integration (CI)
+
+The project includes an automated GitHub Actions workflow that validates every change before it reaches the `main` branch.
+
+## CI Pipeline
+
+```text
+Developer
+    │
+    ▼
+Pull Request
+    │
+    ▼
+GitHub Actions
+    │
+    ├── Install Dependencies
+    ├── Ruff
+    ├── Ruff Formatter
+    ├── Black
+    ├── Pytest
+    ├── Docker Build
+    └── Publish Image (main only)
+```
+
+### CI Features
+
+- Automatic dependency installation
+- Code quality checks
+- Formatting verification
+- Automated testing
+- Docker image build validation
+- GitHub Container Registry publishing
+- Pull Request validation
+
+---
+
+# Containerization
+
+The application is fully containerized using Docker and orchestrated with Docker Compose.
+
+## Services
+
+| Service | Description |
+|----------|-------------|
+| FastAPI API | REST API |
+| PostgreSQL | Primary database |
+| Redis | Cache, rate limiter, messaging |
+| Notification Worker | Background event consumer |
+
+---
+
+## Docker Architecture
+
+```text
+                Docker Compose
+                       │
+     ┌─────────────────┼─────────────────┐
+     │                 │                 │
+     ▼                 ▼                 ▼
+ FastAPI API      PostgreSQL         Redis
+     │                                   │
+     └──────────────► Worker ◄───────────┘
+```
+
+---
+
+# GitHub Container Registry (GHCR)
+
+Every successful push to the `main` branch automatically builds a Docker image and publishes it to GitHub Container Registry.
+
+Image tags include:
+
+- `latest`
+- Commit SHA
+- Semantic version (`v1.0.0`, etc.)
+
+This mirrors the workflow used in modern production environments.
+
+---
+
+# API Overview
 
 ## Authentication
 
-### Login
-
-```http
-POST /login
-```
-
-Returns a JWT access token.
-
----
-
-### Profile
-
-```http
-GET /profile
-```
-
-Requires Bearer authentication.
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/login` | Generate JWT token |
+| GET | `/profile` | Authenticated profile |
 
 ---
 
 ## Users
 
-### Create User
-
-```http
-POST /users
-```
-
-Example:
-
-```json
-{
-  "name": "John Doe",
-  "email": "john@example.com"
-}
-```
-
----
-
-### Get User
-
-```http
-GET /users/{user_id}
-```
-
-Protected endpoint with Redis rate limiting and caching.
-
----
-
-### Get All Users
-
-```http
-GET /users
-```
+| Method | Endpoint |
+|--------|----------|
+| POST | `/users` |
+| GET | `/users` |
+| GET | `/users/{id}` |
 
 ---
 
 ## Projects
 
-### Create Project
-
-```http
-POST /projects
-```
-
-Example:
-
-```json
-{
-  "name": "Backend System",
-  "user_id": 1
-}
-```
-
----
-
-### Get Project
-
-```http
-GET /projects/{project_id}
-```
-
----
-
-### List Projects
-
-```http
-GET /projects
-```
+| Method | Endpoint |
+|--------|----------|
+| POST | `/projects` |
+| GET | `/projects` |
+| GET | `/projects/{id}` |
 
 ---
 
 ## Tasks
 
-### Create Task
+| Method | Endpoint |
+|--------|----------|
+| POST | `/tasks` |
+| GET | `/tasks` |
+| GET | `/tasks/{id}` |
 
-```http
-POST /tasks
-```
-
-Example:
-
-```json
-{
-  "title": "Implement Redis Pub/Sub",
-  "user_id": 1,
-  "project_id": 1
-}
-```
-
-This endpoint triggers an asynchronous Redis Pub/Sub event consumed by the notification worker.
+Task creation automatically publishes a Redis Pub/Sub event consumed by the notification worker.
 
 ---
 
-### Get Task
+# Running Locally
 
-```http
-GET /tasks/{task_id}
+Clone the repository:
+
+```bash
+git clone https://github.com/<your-username>/fastapi-rest-api.git
+
+cd fastapi-rest-api
 ```
 
----
+Install dependencies:
 
-### List Tasks
-
-```http
-GET /tasks
+```bash
+pip install -r requirements.txt
 ```
 
----
+Run the development server:
 
-# Redis Implementation
-
-## 1. Redis Caching
-
-Implemented using the Cache-Aside Pattern:
-
-```text
-Request
-   |
-   v
-Redis Cache
-   |
-Cache Hit  -> Return Data
-
-Cache Miss -> PostgreSQL -> Store in Redis
+```bash
+uvicorn main:app --reload
 ```
 
----
+Open:
 
-## 2. Cache Invalidation
-
-To maintain consistency:
-
-```text
-Update PostgreSQL
-        |
-        v
-Delete Redis Cache Key
+```
+http://localhost:8000/docs
 ```
 
-Database remains the source of truth.
+or
 
----
-
-## 3. Fixed Window Rate Limiting
-
-Implemented using Redis atomic operations:
-
-* INCR
-* EXPIRE
-* TTL
-
-Flow:
-
-```text
-Request
-   |
-Redis Counter
-   |
-Allowed Request
-   |
-OR
-   |
-HTTP 429 Too Many Requests
 ```
-
----
-
-## 4. Redis Pub/Sub Messaging
-
-```text
-Task Created
-     |
-     v
-Redis Publisher
-     |
-     v
-Redis Channel
-     |
-     v
-Notification Worker
+http://localhost:8000/redoc
 ```
-
-Enables asynchronous, loosely coupled communication between services.
 
 ---
 
@@ -479,18 +555,23 @@ Build and start all services:
 docker compose up --build
 ```
 
-Containers:
+Run in the background:
 
-* FastAPI API
-* PostgreSQL Database
-* Redis Server
-* Notification Worker
+```bash
+docker compose up -d
+```
+
+Stop services:
+
+```bash
+docker compose down
+```
 
 ---
 
 # Database Migrations
 
-Create a migration:
+Generate a migration:
 
 ```bash
 alembic revision --autogenerate -m "migration message"
@@ -502,7 +583,7 @@ Apply migrations:
 alembic upgrade head
 ```
 
-Rollback the last migration:
+Rollback:
 
 ```bash
 alembic downgrade -1
@@ -522,163 +603,123 @@ POSTGRES_PASSWORD=password
 POSTGRES_DB=task_manager
 
 SECRET_KEY=your-secret-key
+
 ALGORITHM=HS256
+
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
 
 ---
 
-# Local Development
+# Engineering Practices Demonstrated
 
-Install dependencies:
+This project focuses on engineering practices commonly found in production backend systems.
 
-```bash
-pip install -r requirements.txt
-```
-
-Run the development server:
-
-```bash
-uvicorn main:app --reload
-```
-
-API Documentation:
-
-Swagger UI:
-
-```text
-http://localhost:8000/docs
-```
-
-ReDoc:
-
-```text
-http://localhost:8000/redoc
-```
+- Async Programming
+- Layered (Clean) Architecture
+- Repository Pattern
+- Service Layer
+- Dependency Injection
+- Environment-Based Configuration
+- JWT Authentication
+- OAuth2 Security
+- Redis Cache-Aside Pattern
+- Cache Invalidation
+- Fixed Window Rate Limiting
+- Event-Driven Architecture
+- Background Workers
+- Docker Multi-Container Deployment
+- GitHub Actions CI
+- GitHub Container Registry
+- Automated Testing
+- Database Migrations
 
 ---
 
-# Project Structure
+# What I Learned
 
-```text
-project/
-│
-├── main.py
-├── config.py
-├── database.py
-│
-├── auth.py
-├── redis_client.py
-├── rate_limiter.py
-├── publisher.py
-├── subscriber.py
-│
-├── models.py
-├── schemas.py
-│
-├── user_repository.py
-├── project_repository.py
-├── task_repository.py
-│
-├── user_service.py
-├── project_service.py
-├── task_service.py
-│
-├── alembic/
-│
-├── Dockerfile
-├── docker-compose.yml
-│
-└── requirements.txt
-```
+This project provided hands-on experience with:
+
+- Designing asynchronous backend systems
+- Building maintainable application architecture
+- Managing relational databases
+- Implementing secure authentication
+- Applying caching strategies
+- Building event-driven services
+- Writing automated tests
+- Creating Dockerized applications
+- Designing CI pipelines
+- Publishing container images
+- Working with production-oriented development workflows
 
 ---
 
-# Engineering Highlights
+# Roadmap
 
-This project demonstrates production-oriented backend engineering practices:
+## Completed
 
-✅ Async FastAPI Architecture
-
-✅ PostgreSQL + SQLAlchemy Async ORM
-
-✅ Repository and Service Layer Pattern
-
-✅ Dependency Injection
-
-✅ JWT Authentication
-
-✅ Redis Caching
-
-✅ Redis Pub/Sub Messaging
-
-✅ Fixed Window Rate Limiting
-
-✅ Alembic Database Migrations
-
-✅ Docker Multi-Container Deployment
-
-✅ API Integration Testing
-
-✅ Dedicated Test Database
-
-✅ Clean Layered Architecture
+- Async FastAPI Backend
+- PostgreSQL Integration
+- SQLAlchemy Async ORM
+- JWT Authentication
+- Redis Caching
+- Redis Rate Limiting
+- Redis Pub/Sub
+- Repository Pattern
+- Service Layer
+- Dependency Injection
+- Docker & Docker Compose
+- Automated Testing
+- GitHub Actions CI
+- GitHub Container Registry (GHCR)
 
 ---
 
-# Learning Outcomes
+## In Progress
 
-This project provided practical experience with:
-
-* Production-Style FastAPI Development
-* REST API Design
-* Async Python Programming
-* PostgreSQL Database Design
-* SQLAlchemy Async ORM
-* Database Migrations with Alembic
-* JWT Authentication & OAuth2 Security
-* Repository and Service Layer Architecture
-* Dependency Injection
-* Redis Caching Strategies
-* Cache Invalidation Techniques
-* API Rate Limiting Algorithms
-* Event-Driven Architecture
-* Redis Pub/Sub Messaging
-* Background Worker Design
-* Docker Multi-Container Applications
-* Environment-Based Configuration
-* Scalable Backend System Design
+- Monitoring & Observability
+- Structured Logging
 
 ---
 
-# Future Improvements
+## Planned
 
-Planned enhancements include:
+- Celery & Distributed Task Queue
+- Redis Streams
+- OpenTelemetry Tracing
+- Prometheus Metrics
+- Grafana Dashboards
+- VPS Deployment
+- Reverse Proxy (Nginx)
+- HTTPS with Let's Encrypt
+- Kubernetes Deployment
+- Cloud Deployment (AWS / Azure / GCP)
 
-* Test Coverage Expansion
-    * Project APIs
-    * Task APIs
-    * Authentication APIs
-    * Rate Limiting Validation
-    * Redis Cache Validation
-
-* CI/CD Pipelines using GitHub Actions
-
-* Structured Logging
-
-* Application Metrics and Monitoring
-
-* Celery-Based Distributed Background Jobs
-
-* Redis Streams and Consumer Groups
-
-* Kubernetes Deployment
-
-* Cloud Deployment (AWS/GCP/Azure)
-
-* OpenTelemetry Distributed Tracing
 ---
 
-## Final Note
+# Contributing
 
-This project evolved from a basic CRUD API into a production-oriented backend system demonstrating real-world engineering concepts such as caching, asynchronous communication, API protection, and scalable service design.
+Contributions, suggestions, and improvements are welcome.
+
+If you'd like to contribute:
+
+1. Fork the repository.
+2. Create a feature branch.
+3. Make your changes.
+4. Submit a Pull Request.
+
+---
+
+# License
+
+This project is licensed under the MIT License.
+
+---
+
+# Acknowledgements
+
+This project was built as part of a journey to learn production-grade backend engineering by implementing real-world software engineering practices rather than focusing solely on CRUD functionality.
+
+It continues to evolve with additional capabilities such as observability, distributed task processing, deployment automation, and cloud-native infrastructure.
+
+If you found this repository useful, consider giving it a ⭐.
